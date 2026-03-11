@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bonbón — Artisan Sweet Boutique</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blush:    #f4b8c8;
+    --lavender: #c9b8f4;
+    --mint:     #b8f0e0;
+    --butter:   #f9e8b0;
+    --sky:      #b8d8f4;
+    --peach:    #f4d0b8;
+    --lilac:    #e0b8f4;
+    --white:    #ffffff;
+    --offwhite: #fdfcfa;
+    --soft:     #f7f4f0;
+    --text:     #3a3035;
+    --muted:    #9a8f95;
+    --border:   rgba(180,160,170,0.18);
+  }
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--offwhite);
+    color: var(--text);
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* ── CURSOR ── */
+  #cursor {
+    position: fixed; z-index: 9999; pointer-events: none;
+    width: 14px; height: 14px;
+    background: var(--blush);
+    border-radius: 50%;
+    mix-blend-mode: multiply;
+    transition: width .25s, height .25s, background .25s;
+  }
+  #cursor-ring {
+    position: fixed; z-index: 9998; pointer-events: none;
+    width: 36px; height: 36px;
+    border: 1.5px solid var(--lavender);
+    border-radius: 50%;
+    transition: transform .5s cubic-bezier(.23,1,.32,1);
+  }
+  body:has(button:hover) #cursor,
+  body:has(a:hover) #cursor   { width: 28px; height: 28px; background: var(--lavender); }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 22px 64px;
+    background: rgba(255,255,255,0.82);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
+  .logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2rem; font-weight: 700; font-style: italic;
+    color: var(--text); letter-spacing: 1px;
+    position: relative;
+  }
+  .logo span {
+    display: inline-block;
+    background: linear-gradient(120deg, var(--blush), var(--lavender), var(--peach));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .logo::after {
+    content: '✦';
+    font-size: .7rem; vertical-align: super;
+    -webkit-text-fill-color: var(--blush); margin-right: 4px;
+  }
+  .nav-links { display: flex; gap: 36px; list-style: none; }
+  .nav-links a {
+    font-size: .88rem; font-weight: 500; letter-spacing: .5px;
+    color: var(--muted); text-decoration: none;
+    position: relative; transition: color .3s;
+  }
+  .nav-links a::after {
+    content: ''; position: absolute; bottom: -3px; left: 50%;
+    transform: translateX(-50%);
+    width: 0; height: 1.5px;
+    background: var(--blush); transition: width .3s;
+  }
+  .nav-links a:hover { color: var(--text); }
+  .nav-links a:hover::after { width: 100%; }
+  .nav-cta {
+    padding: 11px 28px;
+    background: var(--text); color: var(--white);
+    border: none; border-radius: 60px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .88rem; font-weight: 600; cursor: none;
+    transition: background .3s, transform .3s, box-shadow .3s;
+    box-shadow: 0 4px 20px rgba(58,48,53,.15);
+  }
+  .nav-cta:hover { background: #5c4a55; transform: translateY(-2px); box-shadow: 0 8px 30px rgba(58,48,53,.2); }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: grid; grid-template-columns: 1fr 1fr;
+    align-items: center;
+    padding: 0 64px;
+    padding-top: 90px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-blob {
+    position: absolute; border-radius: 50%;
+    filter: blur(80px); pointer-events: none; opacity: .55;
+  }
+  .hero-left { position: relative; z-index: 2; }
+  .hero-eyebrow {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 7px 18px;
+    background: var(--butter); border-radius: 30px;
+    font-size: .78rem; font-weight: 600; letter-spacing: 3px;
+    text-transform: uppercase; color: #8a7020;
+    margin-bottom: 30px;
+    opacity: 0; animation: fadeUp .7s .15s forwards;
+  }
+  .hero-eyebrow-dot { width: 6px; height: 6px; background: #c9a030; border-radius: 50%; }
+  .hero-h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(4rem, 7vw, 7.5rem);
+    font-weight: 300; line-height: .95;
+    color: var(--text); margin-bottom: 28px;
+    opacity: 0; animation: fadeUp .7s .3s forwards;
+  }
+  .hero-h1 em {
+    font-style: italic; font-weight: 600;
+    background: linear-gradient(135deg, var(--blush) 0%, var(--lavender) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .hero-p {
+    font-size: 1.05rem; line-height: 1.85; font-weight: 300;
+    color: var(--muted); max-width: 440px;
+    margin-bottom: 44px;
+    opacity: 0; animation: fadeUp .7s .45s forwards;
+  }
+  .hero-actions {
+    display: flex; gap: 14px; align-items: center;
+    opacity: 0; animation: fadeUp .7s .6s forwards;
+  }
+  .btn-filled {
+    padding: 15px 36px;
+    background: var(--text); color: white;
+    border: none; border-radius: 50px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .95rem; font-weight: 600; cursor: none;
+    transition: all .3s;
+    box-shadow: 0 6px 24px rgba(58,48,53,.2);
+  }
+  .btn-filled:hover { background: #5c4a55; transform: translateY(-3px); box-shadow: 0 12px 36px rgba(58,48,53,.25); }
+  .btn-outline {
+    padding: 14px 34px;
+    background: transparent; color: var(--text);
+    border: 1.5px solid var(--border);
+    border-radius: 50px; font-family: 'DM Sans', sans-serif;
+    font-size: .95rem; cursor: none; transition: all .3s;
+  }
+  .btn-outline:hover { border-color: var(--blush); background: rgba(244,184,200,.08); }
+
+  .hero-right {
+    position: relative; z-index: 2;
+    display: flex; align-items: center; justify-content: center;
+    height: 100%;
+  }
+  .hero-visual {
+    position: relative; width: 480px; height: 480px;
+  }
+  /* big soft circle */
+  .hero-ring-outer {
+    position: absolute; inset: 0; border-radius: 50%;
+    background: linear-gradient(145deg, rgba(244,184,200,.3), rgba(201,184,244,.3));
+    border: 1px solid rgba(244,184,200,.4);
+    animation: breathe 6s ease-in-out infinite;
+  }
+  @keyframes breathe {
+    0%,100% { transform: scale(1); }
+    50% { transform: scale(1.04); }
+  }
+  .hero-ring-inner {
+    position: absolute; inset: 60px; border-radius: 50%;
+    background: white;
+    box-shadow: 0 30px 80px rgba(180,140,160,.18);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9rem;
+    animation: floatY 5s ease-in-out infinite;
+  }
+  @keyframes floatY {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(-14px); }
+  }
+  /* orbiting pills */
+  .orbit-pill {
+    position: absolute;
+    padding: 10px 20px;
+    background: white;
+    border-radius: 40px;
+    font-size: .82rem; font-weight: 600;
+    box-shadow: 0 8px 30px rgba(180,140,160,.18);
+    white-space: nowrap;
+    animation: pillFloat ease-in-out infinite;
+    display: flex; align-items: center; gap: 8px;
+  }
+  @keyframes pillFloat {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── MARQUEE ── */
+  .marquee-wrap {
+    overflow: hidden;
+    padding: 18px 0;
+    background: var(--blush);
+    position: relative;
+  }
+  .marquee-track {
+    display: flex; gap: 0;
+    animation: marqueeSlide 22s linear infinite;
+    will-change: transform;
+  }
+  .marquee-item {
+    flex-shrink: 0;
+    display: flex; align-items: center; gap: 20px;
+    padding: 0 30px;
+    font-size: .82rem; font-weight: 600;
+    letter-spacing: 2.5px; text-transform: uppercase;
+    color: #8a4a5a;
+  }
+  .marquee-sep { color: rgba(138,74,90,.4); font-size: 1.2rem; }
+  @keyframes marqueeSlide {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+
+  /* ── SECTION HEADER ── */
+  .sec { padding: 110px 64px; position: relative; }
+  .sec-tag {
+    display: inline-block;
+    font-size: .75rem; font-weight: 600; letter-spacing: 4px;
+    text-transform: uppercase; color: var(--muted);
+    margin-bottom: 14px;
+  }
+  .sec-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2.4rem, 4.5vw, 4rem);
+    font-weight: 400; line-height: 1.1; color: var(--text);
+  }
+  .sec-title em { font-style: italic; color: #b070a0; }
+  .sec-header { margin-bottom: 64px; }
+  .sec-header.center { text-align: center; }
+
+  /* ── PRODUCTS ── */
+  .products-layout {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    grid-template-rows: auto;
+    gap: 20px;
+    max-width: 1240px;
+    margin: 0 auto;
+  }
+
+  .pcard {
+    border-radius: 28px;
+    overflow: hidden;
+    position: relative;
+    cursor: none;
+    background: white;
+    box-shadow: 0 2px 20px rgba(180,140,160,.09);
+    transition: transform .45s cubic-bezier(.23,1,.32,1),
+                box-shadow .45s cubic-bezier(.23,1,.32,1);
+  }
+  .pcard:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 24px 60px rgba(180,140,160,.2);
+  }
+  .pcard-1 { grid-column: span 5; }
+  .pcard-2 { grid-column: span 4; }
+  .pcard-3 { grid-column: span 3; }
+  .pcard-4 { grid-column: span 7; }
+  .pcard-5 { grid-column: span 5; }
+
+  .pcard-inner {
+    padding: 38px 34px;
+    height: 360px;
+    display: flex; flex-direction: column; justify-content: flex-end;
+    position: relative;
+  }
+  .pcard-5 .pcard-inner, .pcard-4 .pcard-inner { height: 300px; }
+
+  .pcard-emoji {
+    position: absolute; top: 28px; right: 28px;
+    font-size: 4.5rem; line-height: 1;
+    transition: transform .4s cubic-bezier(.23,1,.32,1);
+    filter: drop-shadow(0 8px 16px rgba(0,0,0,.08));
+  }
+  .pcard:hover .pcard-emoji { transform: scale(1.15) rotate(-8deg); }
+
+  .pcard-cat {
+    font-size: .72rem; font-weight: 600; letter-spacing: 3px;
+    text-transform: uppercase; margin-bottom: 8px;
+    opacity: .6;
+  }
+  .pcard-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.75rem; font-weight: 600; line-height: 1.15;
+    margin-bottom: 8px;
+  }
+  .pcard-desc {
+    font-size: .85rem; line-height: 1.65; opacity: .65;
+    margin-bottom: 20px;
+  }
+  .pcard-row { display: flex; align-items: center; justify-content: space-between; }
+  .pcard-price { font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; font-weight: 700; }
+  .pcard-add {
+    width: 42px; height: 42px; border-radius: 50%;
+    border: 1.5px solid rgba(0,0,0,.12); background: white;
+    font-size: 1.3rem; display: flex; align-items: center; justify-content: center;
+    cursor: none; transition: all .3s;
+  }
+  .pcard-add:hover { background: var(--text); color: white; border-color: var(--text); }
+
+  /* card color palettes */
+  .theme-blush   { background: linear-gradient(145deg, #fff0f4, #fce0ea); }
+  .theme-lav     { background: linear-gradient(145deg, #f4f0ff, #ecdeff); }
+  .theme-mint    { background: linear-gradient(145deg, #f0fffb, #d8f8ef); }
+  .theme-butter  { background: linear-gradient(145deg, #fffcf0, #fff4cc); }
+  .theme-sky     { background: linear-gradient(145deg, #f0f8ff, #daeeff); }
+  .theme-peach   { background: linear-gradient(145deg, #fff6f0, #ffe8d8); }
+
+  /* ── HIGHLIGHT BAND ── */
+  .highlight {
+    margin: 0 64px 110px;
+    border-radius: 40px;
+    padding: 80px;
+    background: linear-gradient(135deg, #fce8f0, #ede0ff, #e0f8f4);
+    position: relative; overflow: hidden;
+    display: grid; grid-template-columns: 1fr auto;
+    gap: 60px; align-items: center;
+  }
+  .highlight::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23d0a0c0' fill-opacity='0.06'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+  .hl-eyebrow {
+    display: inline-block;
+    padding: 6px 18px; border-radius: 30px;
+    background: white; font-size: .75rem; font-weight: 600;
+    letter-spacing: 3px; text-transform: uppercase; color: var(--muted);
+    margin-bottom: 20px; box-shadow: 0 2px 12px rgba(180,140,160,.15);
+  }
+  .hl-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2.2rem, 3.5vw, 3.5rem);
+    font-weight: 400; line-height: 1.15; color: var(--text);
+    margin-bottom: 18px;
+  }
+  .hl-title em { font-style: italic; color: #b070a0; }
+  .hl-desc { font-size: 1rem; line-height: 1.75; color: var(--muted); margin-bottom: 34px; max-width: 480px; }
+  .hl-right {
+    display: flex; flex-direction: column; align-items: center; gap: 20px;
+  }
+  .gift-box {
+    width: 200px; height: 200px; background: white; border-radius: 30px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 7rem;
+    box-shadow: 0 20px 60px rgba(180,140,160,.22);
+    animation: floatY 5s ease-in-out infinite;
+    position: relative;
+  }
+  .gift-badge {
+    position: absolute; top: -12px; right: -12px;
+    width: 50px; height: 50px; border-radius: 50%;
+    background: var(--butter); border: 2px solid white;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem;
+    box-shadow: 0 4px 16px rgba(180,140,160,.2);
+    animation: spin 8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── PROCESS ── */
+  .process-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 30px;
+    max-width: 1240px; margin: 0 auto;
+  }
+  .process-card {
+    padding: 40px 32px; border-radius: 28px;
+    background: white;
+    border: 1px solid var(--border);
+    position: relative; overflow: hidden;
+    transition: transform .4s cubic-bezier(.23,1,.32,1), box-shadow .4s;
+  }
+  .process-card:hover { transform: translateY(-8px); box-shadow: 0 20px 50px rgba(180,140,160,.15); }
+  .process-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 5rem; font-weight: 700; line-height: 1;
+    opacity: .07; position: absolute; top: 16px; right: 20px;
+  }
+  .process-icon { font-size: 2.6rem; margin-bottom: 20px; display: block; }
+  .process-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.5rem; font-weight: 600; margin-bottom: 12px; color: var(--text);
+  }
+  .process-desc { font-size: .88rem; line-height: 1.7; color: var(--muted); }
+
+  /* ── STATS ── */
+  .stats-row {
+    display: flex; gap: 2px;
+    max-width: 1240px; margin: 0 auto 110px;
+    padding: 0 64px;
+  }
+  .stat-block {
+    flex: 1; padding: 48px 36px; background: white;
+    text-align: center; transition: background .3s;
+    position: relative;
+  }
+  .stat-block:first-child { border-radius: 28px 0 0 28px; }
+  .stat-block:last-child  { border-radius: 0 28px 28px 0; }
+  .stat-block:hover { background: #fdf0f5; }
+  .stat-block::after {
+    content: ''; position: absolute; right: 0; top: 20%; bottom: 20%;
+    width: 1px; background: var(--border);
+  }
+  .stat-block:last-child::after { display: none; }
+  .stat-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 4rem; font-weight: 700; display: block;
+    background: linear-gradient(135deg, var(--blush), var(--lavender));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    line-height: 1; margin-bottom: 10px;
+  }
+  .stat-lbl { font-size: .8rem; font-weight: 500; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); }
+
+  /* ── TESTIMONIALS ── */
+  .reviews-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px;
+    max-width: 1240px; margin: 0 auto;
+  }
+  .review-card {
+    padding: 38px; border-radius: 28px;
+    background: white; border: 1px solid var(--border);
+    transition: all .4s;
+    position: relative;
+  }
+  .review-card:hover { transform: translateY(-8px); box-shadow: 0 20px 50px rgba(180,140,160,.15); }
+  .review-quote {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 5rem; color: var(--blush); line-height: .7;
+    margin-bottom: 16px; display: block;
+  }
+  .review-text { font-size: .92rem; line-height: 1.8; color: var(--muted); margin-bottom: 26px; }
+  .stars { color: #f0c040; font-size: .9rem; letter-spacing: 1px; margin-bottom: 18px; }
+  .reviewer { display: flex; align-items: center; gap: 14px; }
+  .reviewer-av {
+    width: 48px; height: 48px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem;
+  }
+  .reviewer-name { font-weight: 600; font-size: .92rem; color: var(--text); }
+  .reviewer-sub  { font-size: .78rem; color: var(--muted); margin-top: 2px; }
+
+  /* ── NEWSLETTER ── */
+  .newsletter {
+    margin: 0 64px 110px;
+    padding: 80px;
+    border-radius: 40px;
+    background: white;
+    border: 1px solid var(--border);
+    text-align: center;
+    position: relative; overflow: hidden;
+  }
+  .newsletter::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(244,184,200,.25) 0%, transparent 70%);
+  }
+  .nl-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2rem, 3.5vw, 3.2rem); font-weight: 400;
+    line-height: 1.2; color: var(--text); margin-bottom: 14px;
+  }
+  .nl-title em { font-style: italic; color: #b070a0; }
+  .nl-sub { font-size: .95rem; color: var(--muted); margin-bottom: 36px; line-height: 1.6; }
+  .nl-form {
+    display: flex; gap: 10px; max-width: 480px; margin: 0 auto;
+    background: var(--soft); padding: 6px 6px 6px 22px;
+    border-radius: 60px; border: 1px solid var(--border);
+  }
+  .nl-form input {
+    flex: 1; border: none; background: transparent;
+    font-family: 'DM Sans', sans-serif; font-size: .92rem;
+    color: var(--text); outline: none;
+  }
+  .nl-form input::placeholder { color: var(--muted); }
+  .nl-form button {
+    padding: 13px 28px;
+    background: var(--text); color: white;
+    border: none; border-radius: 50px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .9rem; font-weight: 600; cursor: none;
+    transition: background .3s;
+    white-space: nowrap;
+  }
+  .nl-form button:hover { background: #5c4a55; }
+
+  /* ── FOOTER ── */
+  footer {
+    padding: 80px 64px 40px;
+    border-top: 1px solid var(--border);
+  }
+  .footer-grid {
+    display: grid; grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 60px; margin-bottom: 60px;
+  }
+  .footer-brand .logo { font-size: 2.2rem; display: block; margin-bottom: 18px; }
+  .footer-brand p { font-size: .88rem; line-height: 1.75; color: var(--muted); }
+  .footer-col h5 {
+    font-size: .72rem; font-weight: 700; letter-spacing: 3px;
+    text-transform: uppercase; color: var(--muted);
+    margin-bottom: 20px;
+  }
+  .footer-col ul { list-style: none; }
+  .footer-col ul li { margin-bottom: 12px; }
+  .footer-col ul li a {
+    font-size: .88rem; color: var(--muted); text-decoration: none;
+    transition: color .3s;
+  }
+  .footer-col ul li a:hover { color: var(--text); }
+  .footer-bottom {
+    display: flex; justify-content: space-between; align-items: center;
+    padding-top: 30px; border-top: 1px solid var(--border);
+    font-size: .82rem; color: var(--muted);
+  }
+  .socials { display: flex; gap: 12px; }
+  .soc-btn {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: var(--soft); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem; cursor: none; text-decoration: none;
+    transition: all .3s; color: var(--text);
+  }
+  .soc-btn:hover { background: var(--blush); border-color: var(--blush); }
+
+  /* ── SCROLL REVEAL ── */
+  .reveal { opacity: 0; transform: translateY(36px); transition: opacity .8s ease, transform .9s cubic-bezier(.23,1,.32,1); }
+  .reveal.up { opacity: 1; transform: translateY(0); }
+
+  /* ── FLOATING SWEETS ── */
+  .sweet {
+    position: absolute; pointer-events: none;
+    animation: sweetFloat ease-in-out infinite;
+    filter: drop-shadow(0 6px 12px rgba(180,140,160,.25));
+  }
+  @keyframes sweetFloat {
+    0%,100% { transform: translateY(0) rotate(0deg); }
+    33%      { transform: translateY(-18px) rotate(4deg); }
+    66%      { transform: translateY(8px) rotate(-4deg); }
+  }
+
+  /* ── GRAIN OVERLAY ── */
+  body::after {
+    content: ''; position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+    opacity: .025; pointer-events: none; z-index: 9000;
+  }
+</style>
+</head>
+<body>
+
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="logo"><span>Bonbón</span></div>
+  <ul class="nav-links">
+    <li><a href="#shop">Shop</a></li>
+    <li><a href="#craft">Our Craft</a></li>
+    <li><a href="#reviews">Reviews</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <button class="nav-cta">Order Now</button>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <!-- blobs -->
+  <div class="hero-blob" style="width:500px;height:500px;background:var(--blush);top:-100px;right:200px;opacity:.35;"></div>
+  <div class="hero-blob" style="width:350px;height:350px;background:var(--lavender);bottom:0px;right:100px;opacity:.3;"></div>
+  <div class="hero-blob" style="width:250px;height:250px;background:var(--butter);top:200px;left:100px;opacity:.3;"></div>
+
+  <div class="hero-left">
+    <div class="hero-eyebrow"><span class="hero-eyebrow-dot"></span>Artisan Sweet Boutique</div>
+    <h1 class="hero-h1">
+      Life is<br>
+      <em>sweeter</em><br>
+      with us.
+    </h1>
+    <p class="hero-p">
+      Handcrafted confections made daily from the finest ingredients — where every bite tells a story of passion, craft, and pure delight.
+    </p>
+    <div class="hero-actions">
+      <button class="btn-filled">Explore Collection</button>
+      <button class="btn-outline">Watch Our Story</button>
+    </div>
+  </div>
+
+  <div class="hero-right">
+    <div class="hero-visual">
+      <div class="hero-ring-outer"></div>
+      <div class="hero-ring-inner">🎂</div>
+
+      <!-- orbit pills -->
+      <div class="orbit-pill" style="top:18px;left:-30px;animation-duration:4s;animation-delay:0s;background:var(--butter);">
+        <span>🍋</span> Lemon Tart
+      </div>
+      <div class="orbit-pill" style="top:100px;right:-60px;animation-duration:5s;animation-delay:.6s;background:var(--blush);">
+        <span>🌸</span> Rose Macaron
+      </div>
+      <div class="orbit-pill" style="bottom:90px;right:-45px;animation-duration:4.5s;animation-delay:.3s;background:var(--mint);">
+        <span>🍵</span> Matcha Choux
+      </div>
+      <div class="orbit-pill" style="bottom:20px;left:-20px;animation-duration:5.5s;animation-delay:.9s;background:var(--lavender);">
+        <span>🫐</span> Blueberry Mousse
+      </div>
+    </div>
+  </div>
+
+  <!-- floating sweets -->
+  <div class="sweet" style="top:22%;left:4%;font-size:2.4rem;animation-duration:4.5s;">🍬</div>
+  <div class="sweet" style="bottom:28%;left:2%;font-size:1.8rem;animation-duration:3.8s;animation-delay:.5s;">⭐</div>
+  <div class="sweet" style="top:15%;right:3%;font-size:2rem;animation-duration:5s;animation-delay:1s;">✨</div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-wrap">
+  <div class="marquee-track">
+    <span class="marquee-item">French Pastries <span class="marquee-sep">✦</span></span>
+    <span class="marquee-item">Belgian Chocolate <span class="marquee-sep">✦</span></span>
+    <span class="marquee-item">Japanese Mochi <span class="marquee-sep">✦</span></span>
+    <span class="marquee-item">Custom Cakes <span class="marquee-sep">✦</span></span>
+    <span class="marquee-item">Luxury Gift Sets <span class="marquee-sep">✦</span></span>
+    <span class="marquee-item">Daily Delivery <span class="marquee-sep">✦</span></span>
+    <span class="marquee-item">Natural Ingredients <span class="marquee-sep">✦</span></span>
+    <span class="marquee-item">French Pastries <span class="marquee-sep">✦</span></span>
+    <span class="marquee-item">Belgian Chocolate <span class="marquee-sep">✦</span></span>
+    <span class="marquee-item">Japanese Mochi <span class="marquee-sep">✦</span></span>
+    <span class="marquee-item">Custom Cakes <span class="marquee-sep">✦</span></span>
+    <span class="marquee-item">Luxury Gift Sets <span class="marquee-sep">✦</span></span>
+    <span class="marquee-item">Daily Delivery <span class="marquee-sep">✦</span></span>
+    <span class="marquee-item">Natural Ingredients <span class="marquee-sep">✦</span></span>
+  </div>
+</div>
+
+<!-- PRODUCTS -->
+<section class="sec" id="shop">
+  <div class="sec-header reveal">
+    <p class="sec-tag">✦ Our Collection</p>
+    <h2 class="sec-title">Made with <em>love</em> & magic</h2>
+  </div>
+
+  <div class="products-layout">
+
+    <div class="pcard pcard-1 theme-blush reveal">
+      <div class="pcard-inner">
+        <div class="pcard-emoji">🍰</div>
+        <p class="pcard-cat">Signature Cake</p>
+        <h3 class="pcard-name">Strawberry Cloud Cake</h3>
+        <p class="pcard-desc">Layers of airy chiffon, fresh strawberry compote & whipped vanilla cream.</p>
+        <div class="pcard-row">
+          <span class="pcard-price">$48</span>
+          <button class="pcard-add">+</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="pcard pcard-2 theme-lav reveal">
+      <div class="pcard-inner">
+        <div class="pcard-emoji">🫐</div>
+        <p class="pcard-cat">Mousse</p>
+        <h3 class="pcard-name">Blueberry Lavender Mousse</h3>
+        <p class="pcard-desc">Velvety mousse with wild blueberry & delicate floral notes.</p>
+        <div class="pcard-row">
+          <span class="pcard-price">$24</span>
+          <button class="pcard-add">+</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="pcard pcard-3 theme-mint reveal">
+      <div class="pcard-inner">
+        <div class="pcard-emoji">🍡</div>
+        <p class="pcard-cat">Japanese</p>
+        <h3 class="pcard-name">Matcha Mochi</h3>
+        <p class="pcard-desc">Soft rice cakes with ceremonial matcha filling.</p>
+        <div class="pcard-row">
+          <span class="pcard-price">$18</span>
+          <button class="pcard-add">+</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="pcard pcard-4 theme-butter reveal">
+      <div class="pcard-inner" style="height:300px;">
+        <div class="pcard-emoji" style="font-size:6rem;top:22px;right:34px;">🍮</div>
+        <p class="pcard-cat">⭐ Best Seller</p>
+        <h3 class="pcard-name" style="font-size:2.2rem;">Classic Crème Brûlée</h3>
+        <p class="pcard-desc">The timeless Parisian recipe — silky custard, caramelised to perfection.</p>
+        <div class="pcard-row">
+          <span class="pcard-price">$32</span>
+          <button class="btn-filled" style="cursor:none;font-size:.85rem;padding:12px 26px;">Add to Cart 🛒</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="pcard pcard-5 theme-peach reveal">
+      <div class="pcard-inner">
+        <div class="pcard-emoji" style="font-size:3.8rem;">🧁</div>
+        <p class="pcard-cat">Cupcake</p>
+        <h3 class="pcard-name">Peach & Rose Cupcake</h3>
+        <p class="pcard-desc">Delicate vanilla sponge crowned with peach-rose buttercream.</p>
+        <div class="pcard-row">
+          <span class="pcard-price">$14</span>
+          <button class="pcard-add">+</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats-row">
+  <div class="stat-block reveal"><span class="stat-num" data-target="50">0</span><span class="stat-lbl">Sweet Varieties</span></div>
+  <div class="stat-block reveal"><span class="stat-num" data-target="12">0</span><span class="stat-lbl">k Happy Clients</span></div>
+  <div class="stat-block reveal"><span class="stat-num" data-target="8">0</span><span class="stat-lbl">Years of Craft</span></div>
+  <div class="stat-block reveal"><span class="stat-num" data-target="100">0</span><span class="stat-lbl">% Natural</span></div>
+</div>
+
+<!-- HIGHLIGHT / GIFT -->
+<div class="highlight reveal" id="craft">
+  <div>
+    <div class="hl-eyebrow">✦ Chef's Selection</div>
+    <h2 class="hl-title">The <em>Royal</em><br>Gift Collection</h2>
+    <p class="hl-desc">A hand-curated assortment of our finest Belgian chocolates, handmade caramels, and French petits fours — presented in a keepsake ribbon box.</p>
+    <div style="display:flex;gap:14px;">
+      <button class="btn-filled">Order Now — $98</button>
+      <button class="btn-outline" style="cursor:none;">Learn More</button>
+    </div>
+  </div>
+  <div class="hl-right">
+    <div class="gift-box">
+      🎁
+      <div class="gift-badge">⭐</div>
+    </div>
+    <p style="font-size:.82rem;color:var(--muted);font-weight:500;letter-spacing:1px;">Free ribbon wrapping included</p>
+  </div>
+</div>
+
+<!-- PROCESS -->
+<section class="sec">
+  <div class="sec-header center reveal">
+    <p class="sec-tag">✦ How We Work</p>
+    <h2 class="sec-title">From kitchen to <em>your door</em></h2>
+  </div>
+  <div class="process-grid">
+    <div class="process-card reveal">
+      <span class="process-num">01</span>
+      <span class="process-icon">🌾</span>
+      <h3 class="process-title">Finest Ingredients</h3>
+      <p class="process-desc">We source seasonal, natural ingredients from trusted farms and artisan suppliers across Europe.</p>
+    </div>
+    <div class="process-card reveal">
+      <span class="process-num">02</span>
+      <span class="process-icon">👩‍🍳</span>
+      <h3 class="process-title">Handcrafted Daily</h3>
+      <p class="process-desc">Each piece is made fresh every morning by our passionate pastry chefs — never frozen, never rushed.</p>
+    </div>
+    <div class="process-card reveal">
+      <span class="process-num">03</span>
+      <span class="process-icon">🎀</span>
+      <h3 class="process-title">Beautifully Wrapped</h3>
+      <p class="process-desc">Presented in our signature pastel packaging designed to delight before the first bite.</p>
+    </div>
+    <div class="process-card reveal">
+      <span class="process-num">04</span>
+      <span class="process-icon">🚚</span>
+      <h3 class="process-title">Swift Delivery</h3>
+      <p class="process-desc">Same-day delivery in temperature-controlled packaging to keep everything perfectly fresh.</p>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="sec" id="reviews" style="background:var(--soft);">
+  <div class="sec-header center reveal">
+    <p class="sec-tag">✦ Sweet Words</p>
+    <h2 class="sec-title">Our <em>happiest</em> customers</h2>
+  </div>
+  <div class="reviews-grid">
+    <div class="review-card reveal">
+      <span class="review-quote">"</span>
+      <div class="stars">★★★★★</div>
+      <p class="review-text">The Strawberry Cloud Cake was absolutely ethereal. I've tried pastries across Paris and Tokyo — Bonbón genuinely rivals them all.</p>
+      <div class="reviewer">
+        <div class="reviewer-av" style="background:var(--blush);">👩</div>
+        <div>
+          <div class="reviewer-name">Sophia Laurent</div>
+          <div class="reviewer-sub">Loyal customer for 3 years</div>
+        </div>
+      </div>
+    </div>
+    <div class="review-card reveal">
+      <span class="review-quote">"</span>
+      <div class="stars">★★★★★</div>
+      <p class="review-text">Ordered the Royal Gift Collection for our anniversary. The presentation alone brought tears to her eyes. Worth every penny.</p>
+      <div class="reviewer">
+        <div class="reviewer-av" style="background:var(--sky);">👨</div>
+        <div>
+          <div class="reviewer-name">James Holloway</div>
+          <div class="reviewer-sub">First-time buyer</div>
+        </div>
+      </div>
+    </div>
+    <div class="review-card reveal">
+      <span class="review-quote">"</span>
+      <div class="stars">★★★★★</div>
+      <p class="review-text">The crème brûlée is the real deal — that perfect crack, that silky custard. I order one every single weekend without fail.</p>
+      <div class="reviewer">
+        <div class="reviewer-av" style="background:var(--lavender);">👩</div>
+        <div>
+          <div class="reviewer-name">Camille Fontaine</div>
+          <div class="reviewer-sub">French pastry enthusiast</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- NEWSLETTER -->
+<div class="newsletter reveal" id="contact">
+  <div style="position:relative;z-index:1;">
+    <p class="sec-tag">✦ Stay Sweet</p>
+    <h2 class="nl-title">Get <em>first taste</em> of everything new</h2>
+    <p class="nl-sub">Weekly drops, seasonal specials & exclusive member offers straight to your inbox.</p>
+    <div class="nl-form">
+      <input type="email" placeholder="your@email.com">
+      <button>Subscribe ✦</button>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <span class="logo"><span>Bonbón</span></span>
+      <p>An artisan sweet boutique where every confection is a little work of art. Made with love, delivered with care.</p>
+    </div>
+    <div class="footer-col">
+      <h5>Navigate</h5>
+      <ul>
+        <li><a href="#">Home</a></li>
+        <li><a href="#">Shop</a></li>
+        <li><a href="#">About Us</a></li>
+        <li><a href="#">Journal</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h5>Products</h5>
+      <ul>
+        <li><a href="#">Cakes & Tarts</a></li>
+        <li><a href="#">Chocolate</a></li>
+        <li><a href="#">Macarons</a></li>
+        <li><a href="#">Gift Sets</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h5>Contact</h5>
+      <ul>
+        <li><a href="#">📍 Paris 8ème & London</a></li>
+        <li><a href="#">📞 +33 1 00 00 00 00</a></li>
+        <li><a href="#">📧 hello@bonbon.co</a></li>
+        <li><a href="#">⏰ Daily 9am – 9pm</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2024 Bonbón Artisan Sweet Boutique. All rights reserved.</span>
+    <div class="socials">
+      <a class="soc-btn" href="#">📷</a>
+      <a class="soc-btn" href="#">🐦</a>
+      <a class="soc-btn" href="#">💼</a>
+      <a class="soc-btn" href="#">🎵</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // ── Cursor
+  const cur = document.getElementById('cursor');
+  const ring = document.getElementById('cursor-ring');
+  let mx=0,my=0,rx=0,ry=0;
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    cur.style.left  = mx - 7  + 'px';
+    cur.style.top   = my - 7  + 'px';
+  });
+  setInterval(() => {
+    rx += (mx - rx) * .12;
+    ry += (my - ry) * .12;
+    ring.style.left = rx - 18 + 'px';
+    ring.style.top  = ry - 18 + 'px';
+  }, 16);
+
+  // ── Scroll reveal
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        setTimeout(() => e.target.classList.add('up'), i * 80);
+        obs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.08 });
+  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+
+  // ── Counter
+  const counters = document.querySelectorAll('.stat-num[data-target]');
+  const cObs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      const el = e.target;
+      const target = +el.dataset.target;
+      const suffix = el.nextElementSibling?.textContent?.startsWith('k') ? 'k' : (target===100 ? '%' : '');
+      let val = 0;
+      const step = target / 55;
+      const timer = setInterval(() => {
+        val += step;
+        if (val >= target) { el.textContent = target + suffix; clearInterval(timer); }
+        else el.textContent = Math.floor(val) + (val > target * .5 ? suffix : '');
+      }, 18);
+      cObs.unobserve(el);
+    });
+  }, { threshold: .5 });
+  counters.forEach(el => cObs.observe(el));
+
+  // ── 3D tilt on cards
+  document.querySelectorAll('.pcard, .process-card').forEach(card => {
+    card.addEventListener('mousemove', e => {
+      const r = card.getBoundingClientRect();
+      const x = (e.clientX - r.left) / r.width  - .5;
+      const y = (e.clientY - r.top)  / r.height - .5;
+      card.style.transform = `translateY(-10px) rotateX(${-y*7}deg) rotateY(${x*7}deg)`;
+    });
+    card.addEventListener('mouseleave', () => card.style.transform = '');
+  });
+
+  // ── Gentle parallax on hero blobs
+  document.addEventListener('mousemove', e => {
+    const px = (e.clientX / window.innerWidth - .5) * 30;
+    const py = (e.clientY / window.innerHeight - .5) * 20;
+    document.querySelectorAll('.hero-blob').forEach((b, i) => {
+      const d = (i + 1) * .4;
+      b.style.transform = `translate(${px*d}px, ${py*d}px)`;
+    });
+  });
+</script>
+</body>
+</html>

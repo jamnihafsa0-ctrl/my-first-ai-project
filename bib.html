@@ -1,0 +1,1526 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lumière — Novel Library</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Cinzel:wght@400;500;700&family=Lato:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ivory: #F8F4EC;
+    --ivory-light: #FAF7F2;
+    --cream: #EDE8DC;
+    --beige: #D4C9B0;
+    --beige-mid: #C4B89A;
+    --brown-light: #A69070;
+    --brown: #7A5C3A;
+    --brown-dark: #4E3520;
+    --brown-deep: #2E1F0F;
+    --gold: #C9A84C;
+    --gold-light: #E8CC7A;
+    --shadow: rgba(78, 53, 32, 0.15);
+    --shadow-deep: rgba(46, 31, 15, 0.3);
+    --transition: 0.45s cubic-bezier(0.23, 1, 0.32, 1);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Lato', sans-serif;
+    background-color: var(--ivory);
+    color: var(--brown-dark);
+    overflow-x: hidden;
+  }
+
+  /* RTL support */
+  [dir="rtl"] { font-family: 'Lato', 'Segoe UI', sans-serif; }
+
+  /* ===== NOISE TEXTURE OVERLAY ===== */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.5;
+  }
+
+  /* ===== HEADER ===== */
+  header {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 0 5%;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(248, 244, 236, 0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--beige);
+    transition: box-shadow var(--transition);
+  }
+
+  header.scrolled {
+    box-shadow: 0 4px 40px var(--shadow);
+  }
+
+  .logo {
+    font-family: 'Cinzel', serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--brown-dark);
+    letter-spacing: 0.12em;
+    text-decoration: none;
+    position: relative;
+  }
+
+  .logo span {
+    color: var(--gold);
+  }
+
+  .logo::after {
+    content: '';
+    position: absolute;
+    bottom: -4px; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, var(--gold), transparent);
+  }
+
+  nav {
+    display: flex;
+    align-items: center;
+    gap: 2.5rem;
+  }
+
+  nav a {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--brown);
+    text-decoration: none;
+    letter-spacing: 0.05em;
+    position: relative;
+    transition: color var(--transition);
+  }
+
+  nav a::after {
+    content: '';
+    position: absolute;
+    bottom: -3px; left: 0;
+    width: 0; height: 1px;
+    background: var(--gold);
+    transition: width var(--transition);
+  }
+
+  nav a:hover { color: var(--brown-dark); }
+  nav a:hover::after { width: 100%; }
+
+  .lang-switcher {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    border: 1px solid var(--beige);
+    border-radius: 30px;
+    padding: 0.3rem 0.8rem;
+    background: transparent;
+  }
+
+  .lang-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: 'Lato', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 400;
+    color: var(--brown-light);
+    letter-spacing: 0.05em;
+    padding: 0.2rem 0.5rem;
+    border-radius: 20px;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+  }
+
+  .lang-btn.active {
+    background: var(--brown-dark);
+    color: var(--ivory-light);
+  }
+
+  /* ===== HERO ===== */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    padding: 0 8%;
+    position: relative;
+    overflow: hidden;
+    padding-top: 80px;
+  }
+
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background: 
+      radial-gradient(ellipse 80% 60% at 70% 50%, rgba(201, 168, 76, 0.08) 0%, transparent 70%),
+      radial-gradient(ellipse 60% 80% at 20% 80%, rgba(164, 144, 112, 0.1) 0%, transparent 60%);
+  }
+
+  /* Decorative lines */
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: 15%; right: 5%;
+    width: 300px; height: 300px;
+    border: 1px solid rgba(201, 168, 76, 0.15);
+    border-radius: 50%;
+    animation: rotateSlow 30s linear infinite;
+  }
+
+  .hero::after {
+    content: '';
+    position: absolute;
+    top: 20%; right: 8%;
+    width: 200px; height: 200px;
+    border: 1px solid rgba(201, 168, 76, 0.1);
+    border-radius: 50%;
+    animation: rotateSlow 20s linear infinite reverse;
+  }
+
+  @keyframes rotateSlow {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  .hero-content {
+    max-width: 650px;
+    z-index: 1;
+    animation: fadeInUp 1.2s cubic-bezier(0.23, 1, 0.32, 1) both;
+  }
+
+  .hero-eyebrow {
+    font-family: 'Cinzel', serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.3em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .hero-eyebrow::before {
+    content: '';
+    display: inline-block;
+    width: 40px; height: 1px;
+    background: var(--gold);
+  }
+
+  h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(3rem, 6vw, 5.5rem);
+    font-weight: 300;
+    line-height: 1.05;
+    color: var(--brown-deep);
+    margin-bottom: 1.5rem;
+    letter-spacing: -0.02em;
+  }
+
+  h1 em {
+    font-style: italic;
+    color: var(--brown);
+  }
+
+  .hero-desc {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.2rem;
+    font-weight: 300;
+    color: var(--brown-light);
+    line-height: 1.8;
+    max-width: 500px;
+    margin-bottom: 3rem;
+  }
+
+  .hero-cta {
+    display: flex;
+    gap: 1.2rem;
+    flex-wrap: wrap;
+  }
+
+  .btn-primary {
+    font-family: 'Cinzel', serif;
+    font-size: 0.78rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    padding: 1rem 2.2rem;
+    background: var(--brown-dark);
+    color: var(--ivory-light);
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    position: relative;
+    overflow: hidden;
+    transition: all var(--transition);
+    display: inline-block;
+  }
+
+  .btn-primary::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--gold);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform var(--transition);
+  }
+
+  .btn-primary:hover::before { transform: scaleX(1); }
+  .btn-primary:hover { color: var(--brown-deep); }
+  .btn-primary span { position: relative; z-index: 1; }
+
+  .btn-secondary {
+    font-family: 'Cinzel', serif;
+    font-size: 0.78rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    padding: 1rem 2.2rem;
+    background: transparent;
+    color: var(--brown);
+    border: 1px solid var(--beige-mid);
+    cursor: pointer;
+    text-decoration: none;
+    transition: all var(--transition);
+    display: inline-block;
+  }
+
+  .btn-secondary:hover {
+    border-color: var(--brown);
+    color: var(--brown-dark);
+    background: rgba(212, 201, 176, 0.2);
+  }
+
+  /* Floating book visual */
+  .hero-visual {
+    position: absolute;
+    right: 8%;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 340px;
+    animation: fadeInRight 1.4s cubic-bezier(0.23, 1, 0.32, 1) 0.3s both;
+  }
+
+  .book-stack {
+    position: relative;
+    width: 240px;
+    margin: 0 auto;
+  }
+
+  .book {
+    width: 160px;
+    height: 220px;
+    border-radius: 3px 8px 8px 3px;
+    position: absolute;
+    transition: transform var(--transition);
+  }
+
+  .book-1 {
+    background: linear-gradient(135deg, var(--brown-dark), var(--brown));
+    left: 60px; top: 0;
+    box-shadow: 6px 6px 30px var(--shadow-deep), inset -3px 0 8px rgba(0,0,0,0.3);
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .book-2 {
+    background: linear-gradient(135deg, #6B4C2A, #8A6040);
+    left: 30px; top: 20px;
+    z-index: -1;
+    box-shadow: 4px 4px 20px var(--shadow-deep);
+    animation: float 6s ease-in-out infinite 1s;
+  }
+
+  .book-3 {
+    background: linear-gradient(135deg, #3D2410, #5C3A1E);
+    left: 0; top: 40px;
+    z-index: -2;
+    box-shadow: 3px 3px 15px var(--shadow-deep);
+    animation: float 6s ease-in-out infinite 2s;
+  }
+
+  .book-spine {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 18px;
+    background: rgba(0,0,0,0.25);
+    border-radius: 3px 0 0 3px;
+  }
+
+  .book-title-vert {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.7rem;
+    color: rgba(255,255,255,0.6);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    writing-mode: vertical-rl;
+    white-space: nowrap;
+  }
+
+  .book-ornament {
+    position: absolute;
+    top: 15px; left: 25px; right: 15px; bottom: 15px;
+    border: 1px solid rgba(201, 168, 76, 0.25);
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-12px); }
+  }
+
+  /* ===== DIVIDER ===== */
+  .section-divider {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 0 8%;
+    margin: 2rem 0;
+  }
+
+  .section-divider::before, .section-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--beige), transparent);
+  }
+
+  .divider-ornament {
+    color: var(--gold);
+    font-size: 1.2rem;
+    letter-spacing: 0.5rem;
+  }
+
+  /* ===== STATS BAR ===== */
+  .stats-bar {
+    background: var(--brown-dark);
+    padding: 2.5rem 8%;
+    display: flex;
+    justify-content: space-around;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .stat-item {
+    text-align: center;
+    color: var(--ivory);
+  }
+
+  .stat-number {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 3rem;
+    font-weight: 300;
+    color: var(--gold-light);
+    line-height: 1;
+    display: block;
+    counter-reset: count;
+  }
+
+  .stat-label {
+    font-size: 0.72rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--beige);
+    margin-top: 0.5rem;
+    font-family: 'Cinzel', serif;
+  }
+
+  /* ===== SECTION HEADER ===== */
+  .section-header {
+    text-align: center;
+    padding: 5rem 8% 3rem;
+  }
+
+  .section-eyebrow {
+    font-family: 'Cinzel', serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.3em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+    display: block;
+  }
+
+  h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    font-weight: 300;
+    color: var(--brown-deep);
+    line-height: 1.1;
+    margin-bottom: 1rem;
+  }
+
+  h2 em { font-style: italic; color: var(--brown); }
+
+  /* ===== BOOKS GRID ===== */
+  .books-section {
+    padding: 2rem 8% 6rem;
+  }
+
+  /* Search & Filter */
+  .search-filter {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 3rem;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .search-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    background: var(--ivory-light);
+    border: 1px solid var(--beige);
+    padding: 0.8rem 1.4rem;
+    flex: 1;
+    max-width: 400px;
+    transition: border-color var(--transition);
+  }
+
+  .search-bar:focus-within { border-color: var(--brown-light); }
+
+  .search-bar input {
+    background: none;
+    border: none;
+    outline: none;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem;
+    color: var(--brown-dark);
+    width: 100%;
+  }
+
+  .search-bar input::placeholder { color: var(--beige-mid); }
+
+  .search-icon { color: var(--brown-light); font-size: 1rem; }
+
+  .filter-tabs {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .filter-tab {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.9rem;
+    padding: 0.5rem 1.2rem;
+    border: 1px solid var(--beige);
+    background: transparent;
+    cursor: pointer;
+    color: var(--brown-light);
+    transition: all 0.3s;
+    border-radius: 30px;
+  }
+
+  .filter-tab.active, .filter-tab:hover {
+    background: var(--brown-dark);
+    color: var(--ivory-light);
+    border-color: var(--brown-dark);
+  }
+
+  /* Book Cards */
+  .books-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 2rem;
+  }
+
+  .book-card {
+    cursor: pointer;
+    transition: transform var(--transition);
+    animation: fadeInUp 0.8s ease both;
+  }
+
+  .book-card:nth-child(1) { animation-delay: 0.1s; }
+  .book-card:nth-child(2) { animation-delay: 0.2s; }
+  .book-card:nth-child(3) { animation-delay: 0.3s; }
+  .book-card:nth-child(4) { animation-delay: 0.4s; }
+  .book-card:nth-child(5) { animation-delay: 0.5s; }
+  .book-card:nth-child(6) { animation-delay: 0.6s; }
+
+  .book-card:hover { transform: translateY(-8px); }
+
+  .book-cover {
+    width: 100%;
+    aspect-ratio: 2/3;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 4px 8px 30px var(--shadow), -2px 0 0 rgba(0,0,0,0.1);
+    border-radius: 2px 8px 8px 2px;
+    margin-bottom: 1rem;
+  }
+
+  .book-cover-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s ease;
+  }
+
+  .book-card:hover .book-cover-img { transform: scale(1.05); }
+
+  .book-cover-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(46, 31, 15, 0.85) 0%, transparent 50%);
+    opacity: 0;
+    transition: opacity var(--transition);
+    display: flex;
+    align-items: flex-end;
+    padding: 1.2rem;
+  }
+
+  .book-card:hover .book-cover-overlay { opacity: 1; }
+
+  .quick-view-btn {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ivory);
+    border: 1px solid rgba(255,255,255,0.4);
+    padding: 0.6rem 1rem;
+    background: transparent;
+    cursor: pointer;
+    width: 100%;
+    transition: all 0.3s;
+  }
+
+  .quick-view-btn:hover { background: var(--gold); border-color: var(--gold); color: var(--brown-deep); }
+
+  .book-spine-line {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 12px;
+    background: linear-gradient(90deg, rgba(0,0,0,0.3), rgba(0,0,0,0.05));
+  }
+
+  .book-info { padding: 0 0.2rem; }
+
+  .book-genre {
+    font-family: 'Cinzel', serif;
+    font-size: 0.62rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 0.3rem;
+    display: block;
+  }
+
+  .book-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.05rem;
+    font-weight: 500;
+    color: var(--brown-deep);
+    line-height: 1.25;
+    margin-bottom: 0.3rem;
+  }
+
+  .book-author {
+    font-size: 0.8rem;
+    color: var(--brown-light);
+    font-style: italic;
+    font-family: 'Cormorant Garamond', serif;
+  }
+
+  .book-rating {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: 0.5rem;
+  }
+
+  .stars { color: var(--gold); font-size: 0.75rem; letter-spacing: 0.1em; }
+  .rating-num { font-size: 0.78rem; color: var(--brown-light); }
+
+  /* Placeholder covers with colors */
+  .cover-c1 { background: linear-gradient(135deg, #4E3520, #7A5C3A); }
+  .cover-c2 { background: linear-gradient(135deg, #3D2410, #6B4C2A); }
+  .cover-c3 { background: linear-gradient(135deg, #5C4030, #8A6040); }
+  .cover-c4 { background: linear-gradient(135deg, #2E1F0F, #4E3520); }
+  .cover-c5 { background: linear-gradient(135deg, #6B4C2A, #9A7050); }
+  .cover-c6 { background: linear-gradient(135deg, #4A3020, #7A5C3A); }
+
+  .cover-text {
+    position: absolute;
+    inset: 20px 20px 20px 30px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .cover-ornament {
+    width: 40px; height: 1px;
+    background: rgba(201, 168, 76, 0.5);
+    margin-bottom: 8px;
+  }
+
+  .cover-book-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem;
+    font-weight: 300;
+    color: rgba(248, 244, 236, 0.9);
+    line-height: 1.3;
+    letter-spacing: 0.05em;
+    margin-top: auto;
+  }
+
+  .cover-book-author-sm {
+    font-family: 'Lato', sans-serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    color: rgba(201, 168, 76, 0.7);
+    text-transform: uppercase;
+    margin-top: 8px;
+  }
+
+  /* ===== FEATURED SECTION ===== */
+  .featured-section {
+    background: var(--cream);
+    padding: 6rem 8%;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .featured-section::before {
+    content: '"';
+    position: absolute;
+    top: -2rem; left: 5%;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 20rem;
+    color: rgba(201, 168, 76, 0.06);
+    line-height: 1;
+    pointer-events: none;
+  }
+
+  .featured-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6rem;
+    align-items: center;
+  }
+
+  .featured-cover {
+    position: relative;
+    max-width: 280px;
+    margin: 0 auto;
+  }
+
+  .featured-cover-inner {
+    width: 100%;
+    aspect-ratio: 2/3;
+    border-radius: 3px 10px 10px 3px;
+    background: linear-gradient(135deg, var(--brown-deep), var(--brown-dark), var(--brown));
+    box-shadow: 10px 20px 60px var(--shadow-deep), -4px 0 0 rgba(0,0,0,0.2);
+    position: relative;
+    overflow: hidden;
+    animation: float 8s ease-in-out infinite;
+  }
+
+  .featured-cover-inner .book-spine-line { width: 16px; }
+
+  .featured-cover-content {
+    position: absolute;
+    inset: 30px 20px 30px 30px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    color: rgba(248, 244, 236, 0.85);
+  }
+
+  .featured-cover-gem {
+    width: 30px; height: 30px;
+    border: 1px solid rgba(201, 168, 76, 0.4);
+    transform: rotate(45deg);
+    margin-bottom: 8px;
+  }
+
+  .featured-cover-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.4rem;
+    font-weight: 300;
+    line-height: 1.3;
+    letter-spacing: 0.05em;
+    flex: 1;
+    display: flex;
+    align-items: center;
+  }
+
+  .featured-cover-by {
+    font-family: 'Lato', sans-serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: rgba(201, 168, 76, 0.7);
+    text-transform: uppercase;
+  }
+
+  .badge-pick {
+    position: absolute;
+    top: -12px; right: -12px;
+    width: 64px; height: 64px;
+    background: var(--gold);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Cinzel', serif;
+    font-size: 0.55rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-align: center;
+    color: var(--brown-deep);
+    text-transform: uppercase;
+    box-shadow: 0 4px 20px rgba(201, 168, 76, 0.4);
+    animation: pulse 3s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 4px 20px rgba(201, 168, 76, 0.4); }
+    50% { box-shadow: 0 4px 40px rgba(201, 168, 76, 0.7); }
+  }
+
+  .featured-content .section-eyebrow { text-align: left; margin-bottom: 0.8rem; }
+  .featured-content h2 { text-align: left; margin-bottom: 1.2rem; }
+
+  .featured-desc {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.1rem;
+    font-weight: 300;
+    color: var(--brown);
+    line-height: 1.9;
+    margin-bottom: 2rem;
+  }
+
+  .featured-meta {
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .meta-item { }
+  .meta-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--beige-mid);
+    display: block;
+    margin-bottom: 0.2rem;
+  }
+  .meta-value {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem;
+    color: var(--brown-dark);
+    font-weight: 500;
+  }
+
+  /* ===== QUOTE SECTION ===== */
+  .quote-section {
+    padding: 6rem 8%;
+    text-align: center;
+    position: relative;
+  }
+
+  .quote-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(1.5rem, 3vw, 2.5rem);
+    font-weight: 300;
+    font-style: italic;
+    color: var(--brown-dark);
+    line-height: 1.6;
+    max-width: 800px;
+    margin: 0 auto 1.5rem;
+    position: relative;
+  }
+
+  .quote-text::before {
+    content: '"';
+    font-size: 6rem;
+    color: rgba(201, 168, 76, 0.15);
+    position: absolute;
+    top: -2rem; left: -2rem;
+    font-style: normal;
+    line-height: 1;
+  }
+
+  .quote-source {
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.25em;
+    color: var(--gold);
+    text-transform: uppercase;
+  }
+
+  /* ===== NEWSLETTER ===== */
+  .newsletter {
+    background: var(--brown-deep);
+    padding: 5rem 8%;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .newsletter::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at center, rgba(201, 168, 76, 0.08) 0%, transparent 70%);
+  }
+
+  .newsletter h2 { color: var(--ivory-light); }
+  .newsletter .section-eyebrow { }
+
+  .newsletter-desc {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.1rem;
+    color: var(--beige);
+    max-width: 500px;
+    margin: 0 auto 2.5rem;
+    font-weight: 300;
+    line-height: 1.7;
+  }
+
+  .newsletter-form {
+    display: flex;
+    max-width: 460px;
+    margin: 0 auto;
+    gap: 0;
+    position: relative;
+    z-index: 1;
+  }
+
+  .newsletter-input {
+    flex: 1;
+    padding: 1rem 1.4rem;
+    background: rgba(248, 244, 236, 0.08);
+    border: 1px solid rgba(201, 168, 76, 0.25);
+    border-right: none;
+    color: var(--ivory);
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color var(--transition);
+  }
+
+  .newsletter-input::placeholder { color: rgba(212, 201, 176, 0.4); }
+  .newsletter-input:focus { border-color: rgba(201, 168, 76, 0.6); }
+
+  .newsletter-submit {
+    font-family: 'Cinzel', serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 1rem 1.8rem;
+    background: var(--gold);
+    color: var(--brown-deep);
+    border: 1px solid var(--gold);
+    cursor: pointer;
+    font-weight: 700;
+    transition: all var(--transition);
+  }
+
+  .newsletter-submit:hover { background: var(--gold-light); }
+
+  /* ===== FOOTER ===== */
+  footer {
+    background: var(--brown-deep);
+    border-top: 1px solid rgba(201, 168, 76, 0.1);
+    padding: 3rem 8%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+  }
+
+  .footer-logo {
+    font-family: 'Cinzel', serif;
+    font-size: 1.3rem;
+    color: var(--ivory);
+    letter-spacing: 0.15em;
+  }
+
+  .footer-logo span { color: var(--gold); }
+
+  .footer-links {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .footer-links a {
+    font-family: 'Cormorant Garamond', serif;
+    color: var(--beige);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.3s;
+  }
+
+  .footer-links a:hover { color: var(--gold); }
+
+  .footer-copy {
+    font-size: 0.72rem;
+    color: var(--brown-light);
+    letter-spacing: 0.05em;
+  }
+
+  /* ===== ANIMATIONS ===== */
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeInRight {
+    from { opacity: 0; transform: translateY(-50%) translateX(40px); }
+    to { opacity: 1; transform: translateY(-50%) translateX(0); }
+  }
+
+  .animate-in {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.9s cubic-bezier(0.23, 1, 0.32, 1), transform 0.9s cubic-bezier(0.23, 1, 0.32, 1);
+  }
+
+  .animate-in.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ===== SCROLLBAR ===== */
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-track { background: var(--ivory); }
+  ::-webkit-scrollbar-thumb { background: var(--beige-mid); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--brown-light); }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 900px) {
+    .hero-visual { display: none; }
+    .featured-grid { grid-template-columns: 1fr; gap: 3rem; }
+    .featured-content h2 { font-size: 2rem; }
+    nav { gap: 1.5rem; }
+  }
+
+  @media (max-width: 600px) {
+    nav a { display: none; }
+    .books-grid { grid-template-columns: repeat(2, 1fr); gap: 1.2rem; }
+    header { padding: 0 4%; }
+    .hero { padding: 0 5%; }
+  }
+
+  /* Page load animation */
+  .page-loader {
+    position: fixed;
+    inset: 0;
+    background: var(--ivory);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 1rem;
+    transition: opacity 0.8s ease, visibility 0.8s ease;
+  }
+
+  .page-loader.done { opacity: 0; visibility: hidden; }
+
+  .loader-logo {
+    font-family: 'Cinzel', serif;
+    font-size: 2rem;
+    color: var(--brown-dark);
+    letter-spacing: 0.3em;
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+
+  .loader-logo span { color: var(--gold); }
+
+  .loader-line {
+    width: 0; height: 1px;
+    background: var(--gold);
+    animation: loadLine 1.2s ease forwards 0.3s;
+  }
+
+  @keyframes loadLine {
+    to { width: 120px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Page Loader -->
+<div class="page-loader" id="loader">
+  <div class="loader-logo">LUMI<span>È</span>RE</div>
+  <div class="loader-line"></div>
+</div>
+
+<!-- Header -->
+<header id="header">
+  <a href="#" class="logo">LUMI<span>È</span>RE</a>
+  <nav>
+    <a href="#" data-key="nav_home">Home</a>
+    <a href="#books" data-key="nav_library">Library</a>
+    <a href="#featured" data-key="nav_featured">Featured</a>
+    <a href="#" data-key="nav_contact">Contact</a>
+  </nav>
+  <div class="lang-switcher">
+    <button class="lang-btn active" onclick="setLang('en')">EN</button>
+    <button class="lang-btn" onclick="setLang('fr')">FR</button>
+    <button class="lang-btn" onclick="setLang('ar')">AR</button>
+  </div>
+</header>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow" data-key="hero_eyebrow">Est. 1842 — Curated Collection</div>
+    <h1 data-key="hero_title">Where <em>Stories</em><br>Find Their<br>Home</h1>
+    <p class="hero-desc" data-key="hero_desc">Discover a timeless collection of literary masterpieces, handpicked for those who believe in the transformative power of the written word.</p>
+    <div class="hero-cta">
+      <a href="#books" class="btn-primary"><span data-key="btn_explore">Explore Collection</span></a>
+      <a href="#featured" class="btn-secondary" data-key="btn_featured">This Month's Pick</a>
+    </div>
+  </div>
+
+  <!-- Book visual -->
+  <div class="hero-visual">
+    <div class="book-stack">
+      <div class="book book-3">
+        <div class="book-spine"></div>
+        <div class="book-ornament"></div>
+        <div class="book-title-vert">Lumière</div>
+      </div>
+      <div class="book book-2">
+        <div class="book-spine"></div>
+        <div class="book-ornament"></div>
+        <div class="book-title-vert">Classic</div>
+      </div>
+      <div class="book book-1">
+        <div class="book-spine"></div>
+        <div class="book-ornament"></div>
+        <div class="book-title-vert">Collection</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Stats Bar -->
+<div class="stats-bar">
+  <div class="stat-item animate-in">
+    <span class="stat-number" data-count="12000">12,000+</span>
+    <div class="stat-label" data-key="stat_titles">Curated Titles</div>
+  </div>
+  <div class="stat-item animate-in" style="transition-delay:0.1s">
+    <span class="stat-number">85</span>
+    <div class="stat-label" data-key="stat_genres">Literary Genres</div>
+  </div>
+  <div class="stat-item animate-in" style="transition-delay:0.2s">
+    <span class="stat-number">4,200+</span>
+    <div class="stat-label" data-key="stat_members">Members Worldwide</div>
+  </div>
+  <div class="stat-item animate-in" style="transition-delay:0.3s">
+    <span class="stat-number">180+</span>
+    <div class="stat-label" data-key="stat_years">Years of Legacy</div>
+  </div>
+</div>
+
+<!-- Books Section -->
+<section id="books">
+  <div class="section-header animate-in">
+    <span class="section-eyebrow" data-key="library_eyebrow">Our Collection</span>
+    <h2 data-key="library_title">Timeless <em>Literary Works</em></h2>
+  </div>
+
+  <div class="books-section">
+    <div class="search-filter">
+      <div class="search-bar">
+        <span class="search-icon">⌕</span>
+        <input type="text" id="searchInput" placeholder="Search titles, authors..." data-placeholder-key="search_placeholder">
+      </div>
+      <div class="filter-tabs">
+        <button class="filter-tab active" onclick="filterBooks(this,'all')" data-key="filter_all">All</button>
+        <button class="filter-tab" onclick="filterBooks(this,'romance')" data-key="filter_romance">Romance</button>
+        <button class="filter-tab" onclick="filterBooks(this,'mystery')" data-key="filter_mystery">Mystery</button>
+        <button class="filter-tab" onclick="filterBooks(this,'classic')" data-key="filter_classic">Classic</button>
+        <button class="filter-tab" onclick="filterBooks(this,'adventure')" data-key="filter_adventure">Adventure</button>
+      </div>
+    </div>
+
+    <div class="books-grid" id="booksGrid">
+      <!-- Books generated by JS -->
+    </div>
+  </div>
+</section>
+
+<!-- Divider -->
+<div class="section-divider animate-in">
+  <div class="divider-ornament">✦ ✦ ✦</div>
+</div>
+
+<!-- Featured Section -->
+<section class="featured-section" id="featured">
+  <div class="featured-grid">
+    <div class="animate-in">
+      <div class="featured-cover">
+        <div class="featured-cover-inner">
+          <div class="book-spine-line"></div>
+          <div class="featured-cover-content">
+            <div class="featured-cover-gem"></div>
+            <div class="featured-cover-title">The Midnight<br>Garden of<br>Lost Letters</div>
+            <div class="featured-cover-by">— Élise Moreau</div>
+          </div>
+        </div>
+        <div class="badge-pick" data-key="badge_pick">Editor's<br>Pick</div>
+      </div>
+    </div>
+    <div class="featured-content animate-in" style="transition-delay:0.2s">
+      <span class="section-eyebrow" data-key="featured_eyebrow">Book of the Month</span>
+      <h2 data-key="featured_title">The Midnight Garden<br>of <em>Lost Letters</em></h2>
+      <div class="featured-meta">
+        <div class="meta-item">
+          <span class="meta-label" data-key="meta_author">Author</span>
+          <span class="meta-value">Élise Moreau</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label" data-key="meta_genre">Genre</span>
+          <span class="meta-value" data-key="meta_genre_val">Literary Fiction</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label" data-key="meta_year">Year</span>
+          <span class="meta-value">2024</span>
+        </div>
+      </div>
+      <p class="featured-desc" data-key="featured_desc">A haunting tale of memory, letters unwritten, and a garden where time refuses to move forward. Moreau weaves prose of extraordinary beauty around a story that will linger long after the final page is turned.</p>
+      <div class="hero-cta">
+        <a href="#" class="btn-primary"><span data-key="btn_reserve">Reserve Now</span></a>
+        <a href="#" class="btn-secondary" data-key="btn_preview">Read Preview</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Quote -->
+<section class="quote-section animate-in">
+  <p class="quote-text" data-key="quote_text">A reader lives a thousand lives before he dies. The man who never reads lives only one.</p>
+  <div class="quote-source" data-key="quote_source">— George R.R. Martin</div>
+</section>
+
+<!-- Newsletter -->
+<section class="newsletter">
+  <div class="animate-in">
+    <span class="section-eyebrow" data-key="newsletter_eyebrow">Stay Informed</span>
+    <h2 data-key="newsletter_title">Join Our <em>Literary Circle</em></h2>
+    <p class="newsletter-desc" data-key="newsletter_desc">Receive curated recommendations, exclusive author interviews, and new arrivals delivered to your inbox each month.</p>
+    <div class="newsletter-form">
+      <input type="email" class="newsletter-input" data-placeholder-key="email_placeholder" placeholder="Your email address...">
+      <button class="newsletter-submit" data-key="btn_subscribe">Subscribe</button>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer>
+  <div class="footer-logo">LUMI<span>È</span>RE</div>
+  <div class="footer-links">
+    <a href="#" data-key="footer_privacy">Privacy</a>
+    <a href="#" data-key="footer_terms">Terms</a>
+    <a href="#" data-key="footer_about">About</a>
+    <a href="#" data-key="footer_contact">Contact</a>
+  </div>
+  <div class="footer-copy" data-key="footer_copy">© 2024 Lumière Novel Library. All rights reserved.</div>
+</footer>
+
+<script>
+// ===== TRANSLATIONS =====
+const translations = {
+  en: {
+    dir: 'ltr',
+    nav_home: 'Home',
+    nav_library: 'Library',
+    nav_featured: 'Featured',
+    nav_contact: 'Contact',
+    hero_eyebrow: 'Est. 1842 — Curated Collection',
+    hero_title_html: 'Where <em>Stories</em><br>Find Their<br>Home',
+    hero_desc: 'Discover a timeless collection of literary masterpieces, handpicked for those who believe in the transformative power of the written word.',
+    btn_explore: 'Explore Collection',
+    btn_featured: "This Month's Pick",
+    stat_titles: 'Curated Titles',
+    stat_genres: 'Literary Genres',
+    stat_members: 'Members Worldwide',
+    stat_years: 'Years of Legacy',
+    library_eyebrow: 'Our Collection',
+    library_title_html: 'Timeless <em>Literary Works</em>',
+    search_placeholder: 'Search titles, authors...',
+    filter_all: 'All',
+    filter_romance: 'Romance',
+    filter_mystery: 'Mystery',
+    filter_classic: 'Classic',
+    filter_adventure: 'Adventure',
+    featured_eyebrow: 'Book of the Month',
+    featured_title_html: 'The Midnight Garden<br>of <em>Lost Letters</em>',
+    badge_pick: "Editor's\nPick",
+    meta_author: 'Author',
+    meta_genre: 'Genre',
+    meta_genre_val: 'Literary Fiction',
+    meta_year: 'Year',
+    featured_desc: 'A haunting tale of memory, letters unwritten, and a garden where time refuses to move forward. Moreau weaves prose of extraordinary beauty around a story that will linger long after the final page is turned.',
+    btn_reserve: 'Reserve Now',
+    btn_preview: 'Read Preview',
+    quote_text: 'A reader lives a thousand lives before he dies. The man who never reads lives only one.',
+    quote_source: '— George R.R. Martin',
+    newsletter_eyebrow: 'Stay Informed',
+    newsletter_title_html: 'Join Our <em>Literary Circle</em>',
+    newsletter_desc: 'Receive curated recommendations, exclusive author interviews, and new arrivals delivered to your inbox each month.',
+    email_placeholder: 'Your email address...',
+    btn_subscribe: 'Subscribe',
+    footer_privacy: 'Privacy',
+    footer_terms: 'Terms',
+    footer_about: 'About',
+    footer_contact: 'Contact',
+    footer_copy: '© 2024 Lumière Novel Library. All rights reserved.'
+  },
+  fr: {
+    dir: 'ltr',
+    nav_home: 'Accueil',
+    nav_library: 'Bibliothèque',
+    nav_featured: 'Sélection',
+    nav_contact: 'Contact',
+    hero_eyebrow: 'Fondée en 1842 — Collection Curatée',
+    hero_title_html: 'Là où les <em>Histoires</em><br>Trouvent<br>leur Foyer',
+    hero_desc: 'Découvrez une collection intemporelle de chefs-d\'œuvre littéraires, soigneusement sélectionnés pour ceux qui croient au pouvoir transformateur de l\'écrit.',
+    btn_explore: 'Explorer la Collection',
+    btn_featured: 'Le Choix du Mois',
+    stat_titles: 'Titres Sélectionnés',
+    stat_genres: 'Genres Littéraires',
+    stat_members: 'Membres Worldwide',
+    stat_years: 'Ans d\'Héritage',
+    library_eyebrow: 'Notre Collection',
+    library_title_html: 'Œuvres <em>Littéraires</em> Intemporelles',
+    search_placeholder: 'Chercher titres, auteurs...',
+    filter_all: 'Tous',
+    filter_romance: 'Romance',
+    filter_mystery: 'Mystère',
+    filter_classic: 'Classique',
+    filter_adventure: 'Aventure',
+    featured_eyebrow: 'Livre du Mois',
+    featured_title_html: 'Le Jardin de Minuit<br>des <em>Lettres Perdues</em>',
+    badge_pick: "Choix de\nl'Éditeur",
+    meta_author: 'Auteur',
+    meta_genre: 'Genre',
+    meta_genre_val: 'Fiction Littéraire',
+    meta_year: 'Année',
+    featured_desc: 'Un récit envoûtant de mémoire, de lettres non écrites et d\'un jardin où le temps refuse d\'avancer. Moreau tisse une prose d\'une beauté extraordinaire autour d\'une histoire qui persistera longtemps après la dernière page.',
+    btn_reserve: 'Réserver',
+    btn_preview: 'Lire l\'Extrait',
+    quote_text: 'Un lecteur vit mille vies avant de mourir. Celui qui ne lit jamais n\'en vit qu\'une seule.',
+    quote_source: '— George R.R. Martin',
+    newsletter_eyebrow: 'Restez Informé',
+    newsletter_title_html: 'Rejoignez Notre <em>Cercle Littéraire</em>',
+    newsletter_desc: 'Recevez des recommandations curatées, des interviews exclusifs et les nouvelles arrivées chaque mois dans votre boîte mail.',
+    email_placeholder: 'Votre adresse email...',
+    btn_subscribe: "S'abonner",
+    footer_privacy: 'Confidentialité',
+    footer_terms: 'Conditions',
+    footer_about: 'À propos',
+    footer_contact: 'Contact',
+    footer_copy: '© 2024 Lumière Bibliothèque. Tous droits réservés.'
+  },
+  ar: {
+    dir: 'rtl',
+    nav_home: 'الرئيسية',
+    nav_library: 'المكتبة',
+    nav_featured: 'المختار',
+    nav_contact: 'تواصل',
+    hero_eyebrow: 'تأسست عام ١٨٤٢ — مجموعة مختارة',
+    hero_title_html: 'حيث تجد <em>القصص</em><br>وطنها<br>الأبدي',
+    hero_desc: 'اكتشف مجموعة خالدة من روائع الأدب العالمي، منتقاة بعناية لمن يؤمن بالقوة التحويلية للكلمة المكتوبة.',
+    btn_explore: 'استكشف المجموعة',
+    btn_featured: 'اختيار الشهر',
+    stat_titles: 'عنوان مختار',
+    stat_genres: 'نوعاً أدبياً',
+    stat_members: 'عضو حول العالم',
+    stat_years: 'عاماً من الإرث',
+    library_eyebrow: 'مجموعتنا',
+    library_title_html: 'أعمال أدبية <em>خالدة</em>',
+    search_placeholder: 'ابحث عن عنوان أو مؤلف...',
+    filter_all: 'الكل',
+    filter_romance: 'رومانسي',
+    filter_mystery: 'غموض',
+    filter_classic: 'كلاسيكي',
+    filter_adventure: 'مغامرة',
+    featured_eyebrow: 'كتاب الشهر',
+    featured_title_html: 'حديقة منتصف الليل<br>من <em>الرسائل الضائعة</em>',
+    badge_pick: 'اختيار\nالمحرر',
+    meta_author: 'المؤلف',
+    meta_genre: 'النوع',
+    meta_genre_val: 'رواية أدبية',
+    meta_year: 'السنة',
+    featured_desc: 'حكاية ساحرة عن الذاكرة والرسائل غير المكتوبة وحديقة رفض فيها الزمن التقدم. تنسج مورو نثراً بالغ الجمال حول قصة ستظل تلوح في الخاطر طويلاً بعد الانتهاء من آخر صفحة.',
+    btn_reserve: 'احجز الآن',
+    btn_preview: 'قراءة مقتطف',
+    quote_text: 'القارئ يحيا ألف حياة قبل موته، أما من لا يقرأ فلا يحيا إلا مرة واحدة.',
+    quote_source: '— جورج ر. ر. مارتن',
+    newsletter_eyebrow: 'ابق على اطلاع',
+    newsletter_title_html: 'انضم إلى <em>دائرتنا الأدبية</em>',
+    newsletter_desc: 'احصل على توصيات مختارة ومقابلات حصرية مع المؤلفين وأحدث الإصدارات في صندوق بريدك كل شهر.',
+    email_placeholder: 'عنوان بريدك الإلكتروني...',
+    btn_subscribe: 'اشترك',
+    footer_privacy: 'الخصوصية',
+    footer_terms: 'الشروط',
+    footer_about: 'عن المكتبة',
+    footer_contact: 'تواصل معنا',
+    footer_copy: '© ٢٠٢٤ مكتبة لوميير للروايات. جميع الحقوق محفوظة.'
+  }
+};
+
+// ===== BOOKS DATA =====
+const books = [
+  { title: 'The Shadow of the Wind', author: 'Carlos Ruiz Zafón', genre: 'mystery', rating: '4.8', coverClass: 'cover-c1' },
+  { title: 'A Gentleman in Moscow', author: 'Amor Towles', genre: 'classic', rating: '4.9', coverClass: 'cover-c2' },
+  { title: 'The Nightingale', author: 'Kristin Hannah', genre: 'romance', rating: '4.7', coverClass: 'cover-c3' },
+  { title: 'Rebecca', author: 'Daphne du Maurier', genre: 'mystery', rating: '4.6', coverClass: 'cover-c4' },
+  { title: 'The Pillars of the Earth', author: 'Ken Follett', genre: 'adventure', rating: '4.8', coverClass: 'cover-c5' },
+  { title: 'Jane Eyre', author: 'Charlotte Brontë', genre: 'classic', rating: '4.7', coverClass: 'cover-c6' },
+  { title: 'Eleanor Oliphant is Fine', author: 'Gail Honeyman', genre: 'romance', rating: '4.5', coverClass: 'cover-c1' },
+  { title: 'The Name of the Rose', author: 'Umberto Eco', genre: 'mystery', rating: '4.6', coverClass: 'cover-c2' },
+  { title: 'Don Quixote', author: 'Miguel de Cervantes', genre: 'classic', rating: '4.8', coverClass: 'cover-c3' },
+  { title: 'Around the World', author: 'Jules Verne', genre: 'adventure', rating: '4.4', coverClass: 'cover-c4' },
+  { title: 'The Bronze Horseman', author: 'Paullina Simons', genre: 'romance', rating: '4.7', coverClass: 'cover-c5' },
+  { title: 'In the Woods', author: 'Tana French', genre: 'mystery', rating: '4.3', coverClass: 'cover-c6' },
+];
+
+let currentFilter = 'all';
+
+function renderBooks() {
+  const grid = document.getElementById('booksGrid');
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  const filtered = books.filter(b => {
+    const matchFilter = currentFilter === 'all' || b.genre === currentFilter;
+    const matchSearch = b.title.toLowerCase().includes(search) || b.author.toLowerCase().includes(search);
+    return matchFilter && matchSearch;
+  });
+
+  grid.innerHTML = filtered.map((b, i) => `
+    <div class="book-card" style="animation-delay:${i*0.08}s">
+      <div class="book-cover">
+        <div class="${b.coverClass}" style="width:100%;height:100%;position:absolute;inset:0"></div>
+        <div class="book-spine-line"></div>
+        <div class="cover-text">
+          <div>
+            <div class="cover-ornament"></div>
+          </div>
+          <div>
+            <div class="cover-book-title">${b.title}</div>
+            <div class="cover-book-author-sm">${b.author}</div>
+          </div>
+        </div>
+        <div class="book-cover-overlay">
+          <button class="quick-view-btn">Quick View</button>
+        </div>
+      </div>
+      <div class="book-info">
+        <span class="book-genre">${b.genre}</span>
+        <div class="book-name">${b.title}</div>
+        <div class="book-author">${b.author}</div>
+        <div class="book-rating">
+          <span class="stars">★★★★★</span>
+          <span class="rating-num">${b.rating}</span>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function filterBooks(btn, genre) {
+  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  currentFilter = genre;
+  renderBooks();
+}
+
+document.getElementById('searchInput').addEventListener('input', renderBooks);
+
+// ===== LANGUAGE SWITCHER =====
+let currentLang = 'en';
+
+function setLang(lang) {
+  currentLang = lang;
+  const t = translations[lang];
+
+  // Update dir
+  document.documentElement.setAttribute('dir', t.dir);
+  document.documentElement.setAttribute('lang', lang);
+
+  // Update all lang buttons
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.textContent.toLowerCase() === lang);
+  });
+
+  // Update text content
+  document.querySelectorAll('[data-key]').forEach(el => {
+    const key = el.dataset.key;
+    if (t[key]) {
+      // Check for HTML keys
+      const htmlKey = key + '_html';
+      if (t[htmlKey]) {
+        el.innerHTML = t[htmlKey];
+      } else {
+        el.textContent = t[key];
+      }
+    }
+  });
+
+  // HTML keys (titles with inner HTML)
+  const htmlKeys = ['hero_title', 'library_title', 'featured_title', 'newsletter_title'];
+  htmlKeys.forEach(key => {
+    const el = document.querySelector(`[data-key="${key}"]`);
+    if (el && t[key + '_html']) el.innerHTML = t[key + '_html'];
+  });
+
+  // Placeholder updates
+  document.querySelectorAll('[data-placeholder-key]').forEach(el => {
+    const key = el.dataset.placeholderKey;
+    if (t[key]) el.placeholder = t[key];
+  });
+
+  // Badge (has newline)
+  const badge = document.querySelector('[data-key="badge_pick"]');
+  if (badge && t['badge_pick']) badge.innerHTML = t['badge_pick'].replace('\n', '<br>');
+}
+
+// ===== SCROLL ANIMATIONS =====
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) entry.target.classList.add('visible');
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.animate-in').forEach(el => observer.observe(el));
+
+// ===== HEADER SCROLL =====
+window.addEventListener('scroll', () => {
+  document.getElementById('header').classList.toggle('scrolled', window.scrollY > 40);
+});
+
+// ===== PAGE LOADER =====
+window.addEventListener('load', () => {
+  renderBooks();
+  setTimeout(() => {
+    document.getElementById('loader').classList.add('done');
+  }, 1400);
+});
+</script>
+</body>
+</html>
